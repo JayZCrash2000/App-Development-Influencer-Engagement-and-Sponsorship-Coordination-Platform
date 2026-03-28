@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Campaign</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Custom Styles -->
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            padding-top: 56px; /* Adjust for fixed navbar */
+        }
+        .navbar-custom {
+            background-color: #f8f9fa;
+        }
+        .navbar-custom .navbar-brand {
+            color: red;
+            font-size: 25px;
+        }
+        .navbar-custom .nav-link {
+            font-size: 18px;
+            color: #333;
+        }
+        .navbar-custom .nav-link:hover {
+            color: #0056b3;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .card-body {
+            padding: 20px;
+        }
+        .form-group label {
+            font-weight: bold;
+        }
+        .form-control {
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+        }
+        .btn-primary:hover {
+            background-color: #0069d9;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+        <a class="navbar-brand" href="/">PLATFORM4U</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                {% if 'user' in session %}
+                <li class="nav-item">
+                    <span class="nav-link">User: {{ user.name }}</span>
+                </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1>Edit Campaign</h1>
+        <div class="card">
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('edit_campaign', campaign_id=campaign.id) }}">
+                    <div class="form-group">
+                        <label for="campaign_name">Campaign Name:</label>
+                        <input type="text" class="form-control" id="campaign_name" name="campaign_name" value="{{ campaign.name }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description:</label>
+                        <textarea class="form-control" id="description" name="description">{{ campaign.description }}</textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="start_date">Start Date:</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date" value="{{ campaign.start_date.strftime('%Y-%m-%d') }}">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="end_date">End Date:</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date" value="{{ campaign.end_date.strftime('%Y-%m-%d') }}">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="budget">Budget:</label>
+                        <input type="number" class="form-control" id="budget" name="budget" value="{{ campaign.budget }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="visibility">Visibility:</label>
+                        <select class="form-control" id="visibility" name="visibility">
+                            <option value="public" {% if campaign.visibility == 'public' %}selected{% endif %}>Public</option>
+                            <option value="private" {% if campaign.visibility == 'private' %}selected{% endif %}>Private</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="goals">Goals:</label>
+                        <textarea class="form-control" id="goals" name="goals">{{ campaign.goals }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JavaScript and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

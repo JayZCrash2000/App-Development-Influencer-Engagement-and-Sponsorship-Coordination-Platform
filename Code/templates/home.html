@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .navbar-custom {
+            background-color: #f8f9fa;
+            box-shadow: 0 4px 6px -6px #222;
+        }
+
+        .navbar-custom .navbar-brand {
+            color: red;
+            font-size: 25px;
+        }
+
+        .navbar-custom .nav-link {
+            font-size: 18px;
+        }
+
+        .profile-card {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            box-shadow: 0px 6px 5px rgba(0, 0, 0, 1);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .profile-card:hover {
+            box-shadow: 15px 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .profile-card img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+
+        .edit-button {
+            display: block;
+            margin: 10px auto;
+            width: 100px;
+        }
+
+        .edit-form {
+            display: none;
+            margin-top: 10px;
+        }
+
+        .edit-form input,
+        .edit-form textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .edit-form button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .edit-form button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <a class="navbar-brand" href="/">PLATFORM4U</a>
+        <ul class="navbar-nav ml-auto">
+            {% if 'user' in session %}
+                <li class="nav-item">
+                    <span class="nav-link">User: {{ user.full_name }}</span>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">Logout</a>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/login">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/register">Register</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <div class="container mt-4">
+        <h1 class="fw-bold">WELCOME TO THE <span style="color: red; font-size: 50px;">PLATFORM4U</span></h1>
+        <p>This platform connects sponsors and influencers for marketing collaborations.</p>
+        {% if 'user' in session %}
+            {% if user.is_flagged %}
+                <div class="alert alert-danger" role="alert">
+                    You have been flagged by the administrator. You cannot perform any actions on the platform.
+                </div>
+            {% endif %}
+            {% if user.role == 'influencer' %}
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="profile-card">
+                            {% if user.profile_picture %}
+                                <img src="{{ url_for('static', filename='profile_pictures/' + user.profile_picture) }}" alt="Profile Picture">
+                            {% else %}
+                                <img src="{{ url_for('static', filename='default_profile.png') }}" alt="Please add a picture">
+                            {% endif %}
+                            <h3>{{ user.full_name }}</h3>
+                            <p>Username: {{ user.username }}</p>
+                            <p>Email: {{ user.email }}</p>
+                            <p>Bio: {{ user.bio }}</p>
+                            <p>Category: {{ user.category }}</p>
+                            <p>Niche: {{ user.niche }}</p>
+                            <p>Reach: {{ user.reach }}</p>
+                            <button class="btn btn-primary edit-button" onclick="showEditForm()">Edit Profile</button>
+                            <div class="edit-form">
+                                <form method="POST" action="/upload_profile_picture" enctype="multipart/form-data">
+                                    <input type="file" name="profile_picture" accept="image/*">
+                                    <button type="submit" class="btn btn-success">Upload Picture</button>
+                                </form>
+                                <form method="POST" action="/update_profile_inf">
+                                    <input type="hidden" name="user_id" value="{{ user.id }}">
+                                    <label for="full-name">Full Name:</label>
+                                    <input type="text" id="full-name" name="full-name" value="{{ user.full_name }}">
+                                    <label for="email">Email:</label>
+                                    <input type="email" id="email" name="email" value="{{ user.email }}">
+                                    <label for="bio">Bio:</label>
+                                    <textarea id="bio" name="bio">{{ user.bio }}</textarea>
+                                    <label for="category">Category:</label>
+                                    <input type="text" id="category" name="category" value="{{ user.category }}">
+                                    <label for="niche">Niche:</label>
+                                    <input type="text" id="niche" name="niche" value="{{ user.niche }}">
+                                    <label for="reach">Reach:</label>
+                                    <input type="text" id="reach" name="reach" value="{{ user.reach }}">
+                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="profile-card" >
+                        <h2>Influencer Dashboard</h2>
+                        <p>You can view and apply to campaigns, update your profile, and manage your ad requests.</p>
+                        <a href="/search_campaigns" class="btn btn-primary">Search Campaigns</a>
+                        <a href="/request_list" class="btn btn-secondary">View Ad Requests</a> 
+                        <a href="/influencer_campaigns" class="btn btn-secondary">Private Campaign Requests</a>
+                    </div>
+                </div>
+            {% elif user.role == 'sponsor' %}
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="profile-card">
+                            {% if user.profile_picture %}
+                                <img src="{{ url_for('static', filename='profile_pictures/' + user.profile_picture) }}" alt="Profile Picture">
+                            {% else %}
+                                <img src="{{ url_for('static', filename='default_profile.png') }}" alt="Please add a picture">
+                            {% endif %}
+                            <h3>{{ user.full_name }}</h3>
+                            <p>Username: {{ user.username }}</p>
+                            <p>Email: {{ user.email }}</p>
+                            <p>Bio: {{ user.bio }}</p>
+                            <p>Industry: {{ user.industry }}</p>
+                            <p>Budget: {{ user.budget }}</p>
+                            <button class="btn btn-primary edit-button" onclick="showEditForm()">Edit Profile</button>
+                            <div class="edit-form">
+                                <form method="POST" action="/upload_profile_picture_sp" enctype="multipart/form-data"> 
+                                    <input type="hidden" name="user_id" value="{{ user.id }}">  <!-- Pass user_id to the form -->
+                                    <input type="file" name="profile_picture" accept="image/*">
+                                    <button type="submit" class="btn btn-success">Upload Picture</button>
+                                </form>
+                                <form method="POST" action="/update_profile_sp">
+                                    <input type="hidden" name="user_id" value="{{ user.id }}">
+                                    <label for="full-name">Full Name:</label>
+                                    <input type="text" id="full-name" name="full-name" value="{{ user.full_name }}">
+                                    <label for="email">Email:</label>
+                                    <input type="email" id="email" name="email" value="{{ user.email }}">
+                                    <label for="bio">Bio:</label>
+                                    <textarea id="bio" name="bio">{{ user.bio }}</textarea>
+                                    <label for="industry">Industry:</label>
+                                    <input type="text" id="industry" name="industry" value="{{ user.industry }}">
+                                    <label for="budget">Budget:</label>
+                                    <input type="text" id="budget" name="budget" value="{{ user.budget }}">
+                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="profile-card">
+                        <h2>Sponsor Dashboard</h2>
+                        <p>You can create campaigns, search for influencers, and manage ad requests.</p>
+                        <a href="/create_campaign" class="btn btn-primary">Create Campaign</a><br><br>
+                        <a href="/view_ad_requests" class="btn btn-secondary">View Ad Requests</a> <br> <br>
+                        <a href="/my_campaigns" class="btn btn-secondary">All Campaigns</a> <br> <br>
+                        <a href="/my_private_campaigns" class="btn btn-secondary">Private Campaigns</a><br> <br>
+                        <a href="/search_influencers" class="btn btn-secondary">Search Influencers</a>
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <script>
+        function showEditForm() {
+            const editForm = document.querySelector('.edit-form');
+            editForm.style.display = 'block';
+        }
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

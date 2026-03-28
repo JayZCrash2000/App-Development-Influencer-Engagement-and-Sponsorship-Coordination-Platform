@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Ad Requests</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        .navbar-custom {
+            background-color: #f8f9fa;
+            box-shadow: 0 4px 6px -6px #222;
+        }
+
+        .navbar-custom .navbar-brand {
+            color: red;
+            font-size: 25px;
+        }
+
+        .navbar-custom .nav-link {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .navbar-custom .nav-link:hover {
+            color: #007bff;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .table {
+            margin-top: 20px;
+        }
+
+        .btn-success, .btn-danger {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+        <a class="navbar-brand" href="/">PLATFORM4U</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ml-auto">
+                {% if 'user' in session %}
+                    <li class="nav-item">
+                        <span class="nav-link">User: {{ session['user']['name'] }}</span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">Logout</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/register">Register</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+    <header>
+        <h1>View Ad Requests</h1>
+    </header>
+
+    <main>
+        <div class="container">
+            <h2>Ad Requests</h2>
+            {% if requests %}
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Request ID</th>
+                            <th>Campaign Name</th>
+                            <th>Influencer Name</th>
+                            <th>Messages</th>
+                            <th>Requirements</th>
+                            <th>Payment Amount</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for flask_request in requests %}
+                            <tr>
+                                <td>{{ flask_request.id }}</td>
+                                <td>{{ flask_request.campaign.name }}</td>
+                                <td>{{ flask_request.influencer.full_name }}</td>
+                                <td>{{ flask_request.messages }}</td>
+                                <td>{{ flask_request.requirements }}</td>
+                                <td>${{ flask_request.payment_amount }}</td>
+                                <td>{{ flask_request.status }}</td>
+                                <td>
+                                    {% if flask_request.status == 'Pending' %}
+                                        <form method="POST" action="/approve_request/{{ flask_request.id }}" class="d-inline">
+                                            <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                                        </form>
+                                        <form method="POST" action="/reject_request/{{ flask_request.id }}" class="d-inline">
+                                            <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No ad requests found.</p>
+            {% endif %}
+        </div>
+    </main>
+
+    <!-- Bootstrap JavaScript and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

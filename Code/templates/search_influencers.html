@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Influencers</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Custom styles */
+        body {
+            padding-top: 56px; /* Adjust for fixed navbar */
+            background-color: #f4f4f4;
+        }
+        .navbar-custom {
+            background-color: #f8f9fa;
+            box-shadow: 0 4px 6px -6px #222;
+        }
+        .navbar-custom .navbar-brand {
+            color: red;
+            font-size: 25px;
+        }
+        .navbar-custom .nav-link {
+            font-size: 18px;
+            color: #333;
+        }
+        header {
+            background-color: #80e6ea;
+            color: #282020;
+            padding: 10px 0;
+            text-align: center;
+        }
+        .form-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
+            max-width: 600px;
+        }
+        .card-img-top {
+            max-height: 200px;
+            object-fit: cover;
+        }
+        .card {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .card-text {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+        <a class="navbar-brand" href="/">PLATFORM4U</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ml-auto">
+                {% if 'user' in session %}
+                    <li class="nav-item">
+                        <span class="nav-link">User: {{ user.name }}</span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">Logout</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/register">Register</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container mt-4">
+        <div class="form-container">
+            <form method="POST" action="{{ url_for('search_influencers') }}">
+                <div class="form-group">
+                    <input type="text" class="form-control" name="search_term" placeholder="Search by name, niche, or category">
+                </div>
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+        </div>
+
+        <div class="row mt-4">
+            {% for influencer in influencers %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    
+                    <div class="card-body">
+                        <h2 class="card-title">{{ influencer.full_name }}</h2>
+                        <p class="card-text"><strong>Niche:</strong> {{ influencer.niche }}</p>
+                        <p class="card-text"><strong>Email:</strong> {{ influencer.email }}</p>
+                        <p class="card-text"><strong>Bio:</strong> {{ influencer.bio }}</p>
+                        <p class="card-text"><strong>Category:</strong> {{ influencer.category }}</p>
+                        <p class="card-text"><strong>Reach:</strong> {{ influencer.reach }}</p>
+                        
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    <!-- Bootstrap JavaScript and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

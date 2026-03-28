@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Campaign</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script> <!-- jQuery  -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+        .form-container {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-header {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+        }
+
+        .btn-primary, .btn-secondary {
+            width: 150px;
+        }
+
+        .niche-section, .influencer-section {
+            display: none;
+        }
+
+        .navbar-custom {
+            background-color: #f8f9fa;
+            box-shadow: 0 4px 6px -6px #222;
+        }
+
+        .navbar-custom .navbar-brand {
+            color: red;
+            font-size: 25px;
+        }
+
+        .navbar-custom .nav-link {
+            color: #555;
+        }
+
+        .navbar-custom .nav-link:hover {
+            color: #007bff;
+        }
+    </style>
+    <script>
+        $(document).ready(function() {
+            $('#visibility').change(function() {
+                if ($(this).val() === 'private') {
+                    $.ajax({
+                        url: '/get_niches',
+                        method: 'GET',
+                        success: function(data) {
+                            $('#niche').empty();
+                            $('#niche').append('<option value="">Select a Niche</option>');
+                            $.each(data, function(index, niche) {
+                                $('#niche').append('<option value="' + niche + '">' + niche + '</option>');
+                            });
+                            $('#niche-section').show();
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("AJAX Error: ", status, error);
+                        }
+                    });
+                } else {
+                    $('#niche').empty();
+                    $('#niche').append('<option value="">Select a Niche</option>');
+                    $('#influencers').empty();
+                    $('#niche-section').hide();
+                    $('#influencer-section').hide();
+                }
+            });
+
+            $('#niche').change(function() {
+                var selectedNiche = $(this).val();
+                if (selectedNiche) {
+                    $.ajax({
+                        url: '/get_influencers_by_niche/' + selectedNiche,
+                        method: 'GET',
+                        success: function(data) {
+                            $('#influencers').empty();
+                            $.each(data, function(index, influencer) {
+                                $('#influencers').append('<option value="' + influencer.id + '">' + influencer.full_name + '</option>');
+                            });
+                            $('#influencer-section').show();
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("AJAX Error: ", status, error);
+                        }
+                    });
+                } else {
+                    $('#influencers').empty();
+                    $('#influencer-section').hide();
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <a class="navbar-brand" href="/">PLATFORM4U</a>
+        <ul class="navbar-nav ml-auto">
+            {% if 'user' in session %}
+                <li class="nav-item">
+                    <span class="nav-link">User: {{ user.full_name }}</span>
+                </li>
+         
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">Logout</a>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/login">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/register">Register</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    <div class="container">
+        <div class="form-container">
+            <h1 class="form-header">Create New Campaign</h1>
+            <form method="POST" action="/create_campaign">
+                <div class="form-group">
+                    <label for="campaign_name">Campaign Name:</label>
+                    <input type="text" class="form-control" id="campaign_name" name="campaign_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <textarea class="form-control" id="description" name="description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="start_date">Start Date:</label>
+                    <input type="date" class="form-control" id="start_date" name="start_date" required>
+                </div>
+                <div class="form-group">
+                    <label for="end_date">End Date:</label>
+                    <input type="date" class="form-control" id="end_date" name="end_date" required>
+                </div>
+                <div class="form-group">
+                    <label for="budget">Budget:</label>
+                    <input type="number" class="form-control" id="budget" name="budget" required>
+                </div>
+                <div class="form-group">
+                    <label for="visibility">Visibility:</label>
+                    <select class="form-control" id="visibility" name="visibility">
+                        <option value="public">Public</option>
+                        <option value="private">Private</option>
+                    </select>
+                </div>
+                <div class="form-group niche-section" id="niche-section">
+                    <label for="niche">Select Niche:</label>
+                    <select class="form-control" id="niche" name="niche">
+                        <option value="">Select a Niche</option>
+                    </select>
+                </div>
+                <div class="form-group influencer-section" id="influencer-section">
+                    <label for="influencers">Select Influencers:</label>
+                    <select class="form-control" id="influencers" name="influencer_ids[]" multiple>
+                        <!-- Options will be dynamically populated here -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="goals">Goals:</label>
+                    <textarea class="form-control" id="goals" name="goals"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Campaign</button>
+                <a href="/" class="btn btn-secondary">Back</a>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <!-- Link to Bootstrap CSS for styling -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Link to Chart.js library for charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom Styles for the page -->
+    <style>
+        .navbar-custom {
+            background-color: #f8f9fa; /* Light gray background for the navbar */
+            box-shadow: 0 4px 6px -6px #222; /* Subtle shadow for the navbar */
+        }
+
+        .navbar-custom .navbar-brand {
+            color: red; /* Red color for the brand text */
+            font-size: 25px; /* Font size for the brand text */
+        }
+
+        .navbar-custom .navbar-text {
+            color: rgb(7, 7, 7); /* Black color for the navbar text */
+            font-size: 30px; /* Font size for the navbar text */
+            font-weight: bold; /* Bold font for the navbar text */
+        }
+
+        .navbar-custom .nav-link {
+            font-size: 18px; /* Font size for the navigation links */
+            color: #333; /* Dark gray color for the navigation links */
+        }
+
+        .navbar-custom .nav-link:hover {
+            color: #007bff; /* Blue color when hovering over the navigation links */
+        }
+
+        main {
+            padding: 20px; /* Padding for the main content */
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 30%; 
+            margin-left: 0;
+            position: relative; /* Make this container relative */
+            top: 0px; /* Position it below the navbar (adjust if needed) */
+            left: 0px; /* Position it to the right */
+        }
+        
+        .container2 {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 70%; 
+            margin-right: 0;
+            position: absolute; /* Keep this container absolute */
+            top: 56px; /* Position it at the top of the relative container */
+            right: 0; /* Position it at the right of the relative container */
+        }
+        
+
+        .btn-sm {
+            padding: 5px 10px; /* Padding for small buttons */
+        }
+
+        .badge {
+            font-size: 1.1em; /* Slightly larger font size for badges */
+        }
+
+        .table th, .table td {
+            vertical-align: middle; /* Vertically center-align text in table cells */
+        }
+        .card {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            border-radius: 5px;
+            box-shadow: 0px 6px 5px rgba(0, 0, 0, 0.5);
+            transition: box-shadow 0.3s ease;
+            background-color: rgb(244, 249, 249);
+            
+        }
+        .card:hover {
+            box-shadow: 15px 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-body {
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation bar -->
+    <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+        <a class="navbar-brand" href="admin_dashboard">PLATFORM4U</a> <!-- Brand link -->
+        <span class="navbar-text ml-auto">Admin Dashboard</span> <!-- Admin Dashboard text -->
+        <ul class="navbar-nav ml-auto">
+            {% if 'user' in session %} <!-- Check if user is logged in -->
+                <li class="nav-item">
+                    <span class="nav-link">User: {{ session['user']['name'] }}</span> <!-- Display username -->
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">Logout</a> <!-- Logout link -->
+                </li>
+            {% else %} <!-- If user is not logged in -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/login">Login</a> <!-- Login link -->
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/register">Register</a> <!-- Register link -->
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    
+    
+        <div class="container mt-5 pt-5"> 
+        {% if 'user' in session and session['user']['role'] == 'admin' %} <!-- Check if user is an admin -->
+            <!-- Stats summary -->
+            <div class = 'card'>
+            <div class = 'card-body'>
+                <div class="row-md-12">
+                    <div class="row-md-4">
+                        <h3>Active Users: <span class="badge badge-primary">{{ active_users }}</span></h3>
+                    </div>
+                    <div class="row-md-4">
+                        <h3>Influencers: <span class="badge badge-success">{{ influencers }}</span></h3>
+                    </div>
+                    <div class="row-md-4">
+                        <h3>Sponsors:  <span class="badge badge-info">{{ sponsors }}</span></h3>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <!-- Charts for campaigns and ad requests -->
+            <div class = 'card'>
+            <div class = 'card-body'>
+            <div class="col mb-4">
+                <div class="col-md-10">
+                    <h2>Campaigns:</h2>
+                    <canvas id="campaignChart"></canvas> <!-- Canvas for the campaign chart -->
+                </div>
+            </div>
+            </div>
+            </div>
+            
+            <div class = 'card'>
+            <div class = 'card-body'>
+            <div class="col mb-4">        
+                <div class="col-md-10">
+                    <h2>Ad Requests:</h2>
+                    <canvas id="adRequestChart"></canvas> <!-- Canvas for the ad request chart -->
+                </div>
+            </div>
+            </div>
+            </div>
+        </div>
+
+        <div class="container2 ">
+            <div class="row mb-4"> <!-- Influencers table -->
+                <div class = 'card'>
+                <div class = 'card-body'>
+                <div class="col-md-12"> 
+                    <h2>Influencers:</h2>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Full Name</th>
+                                <th>Niche</th>
+                                <th>Reach</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in influencers_list %}
+                                <tr>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.full_name }}</td>
+                                    <td>{{ user.niche }}</td>
+                                    <td>{{ user.reach }}</td>
+                                    <td>
+                                        {% if user.is_flagged %}
+                                            <form method="POST" action="/unflag_user/{{ user.id }}" class="d-inline">
+                                                <button type="submit" class="btn btn-warning btn-sm">Unflag</button>
+                                            </form>
+                                        {% else %}
+                                            <form method="POST" action="/flag_user/{{ user.id }}" class="d-inline">
+                                                <button type="submit" class="btn btn-danger btn-sm">Flag</button>
+                                            </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                </div>
+                </div>
+            </div>
+        
+            <!-- sponsor table should be in top right of the container2 -->
+
+            <div class="row mb-4">
+            <div class = 'card'>
+            <div class = 'card-body'>
+                <!-- Sponsors table -->
+                <div class="col-md-12">
+                    <h2>Sponsors:</h2>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Full Name</th>
+                                <th>Industry</th>
+                                <th>Budget</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in sponsors_list %}
+                                <tr>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.full_name }}</td>
+                                    <td>{{ user.industry }}</td>
+                                    <td>${{ user.budget }}</td>
+                                    <td>
+                                        {% if user.is_flagged %}
+                                            <form method="POST" action="/unflag_user/{{ user.id }}" class="d-inline">
+                                                <button type="submit" class="btn btn-warning btn-sm">Unflag</button>
+                                            </form>
+                                        {% else %}
+                                            <form method="POST" action="/flag_user/{{ user.id }}" class="d-inline">
+                                                <button type="submit" class="btn btn-danger btn-sm">Flag</button>
+                                            </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            </div>
+            </div>
+                
+            <!-- Campaigns table -->
+            <div class="row mb-4">
+                <div class = 'card'>
+                <div class = 'card-body'>
+                <div class="col-md-12">
+                    <h2>Campaigns:</h2>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Sponsor Name</th>
+                                <th>Campaign</th>
+                                <th>Description</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Budget</th>
+                                <th>Visibility</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for campaign in campaigns %}
+                            <tr>
+                                <td>{{ campaign.id }}</td>
+                                <td>{{ campaign.sponsor.full_name }}</td>
+                                <td>{{ campaign.name }}</td>
+                                <td>{{ campaign.description }}</td>
+                                <td>{{ campaign.start_date }}</td>
+                                <td>{{ campaign.end_date }}</td>
+                                <td>${{ campaign.budget }}</td>
+                                <td>{{ campaign.visibility }}</td>
+                                <td>
+                                    <form method="POST" action="/delete_campaign/{{ campaign.id }}" class="d-inline">
+                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Ad Requests table -->
+                <div class="col-md-12">
+                    <h2>Ad Requests:</h2>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Campaign</th>
+                                <th>Influencer</th>
+                                <th>Messages</th>
+                                <th>Requirements</th>
+                                <th>Payment Amount</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for flask_request in ad_requests %}
+                            <tr>
+                                <td>{{ flask_request.id }}</td>
+                                <td>{{ flask_request.campaign.name }}</td>
+                                <td>{{ flask_request.influencer.full_name }}</td>
+                                <td>{{ flask_request.messages }}</td>
+                                <td>{{ flask_request.requirements }}</td>
+                                <td>${{ flask_request.payment_amount }}</td>
+                                <td>{{ flask_request.status }}</td>
+                                <td>
+                                    <form method="POST" action="/delete_request/{{ flask_request.id }}" class="d-inline">
+                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            </div>
+            </div>
+        </div>    
+        {% else %} <!-- If user is not an admin -->
+            {% if 'user' in session %}
+                <div class="alert alert-info" role="alert">
+                    You are logged in as a {{ session['user']['role'] }}.
+                </div>
+            {% endif %}
+        {% endif %}
+
+
+    <!-- Bootstrap JavaScript and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        // Campaign Chart
+        const campaignChartCanvas = document.getElementById('campaignChart');
+        const campaignChart = new Chart(campaignChartCanvas, {
+            type: 'bar', // Bar chart
+            data: {
+                labels: ['Public', 'Private'], // Labels for the chart
+                datasets: [{
+                    label: 'Public Campaign', // Chart label
+                    data: [{{ public_campaigns }}, {{ private_campaigns }}], // Data for the chart
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.2)', // Light blue
+                        'rgba(255, 99, 132, 0.2)' // Light red
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)', // Dark blue
+                        'rgba(255, 99, 132, 1)' // Dark red
+                    ],
+                    borderWidth: 1 // Border width
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true // Y-axis starts at zero
+                    }
+                }
+            }
+        });
+
+        // Ad Request Chart
+        const adRequestChartCanvas = document.getElementById('adRequestChart');
+        const adRequestChart = new Chart(adRequestChartCanvas, {
+            type: 'pie', // Pie chart
+            data: {
+                labels: ['Approved', 'Rejected', 'Pending'], // Labels for the chart
+                datasets: [{
+                    label: 'Ad Request Status', // Chart label
+                    data: [{{ approved_requests }}, {{ rejected_requests }}, {{ pending_requests }}], // Data for the chart
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.2)', // Light green
+                        'rgba(255, 99, 132, 0.2)', // Light red
+                        'rgba(255, 159, 64, 0.2)' // Light orange
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)', // Dark green
+                        'rgba(255, 99, 132, 1)', // Dark red
+                        'rgba(255, 159, 64, 1)' // Dark orange
+                    ],
+                    borderWidth: 1 // Border width
+                }]
+            },
+            options: {
+                responsive: true, // Chart is responsive
+                plugins: {
+                    legend: {
+                        position: 'top', // Legend position
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return tooltipItem.label + ': ' + tooltipItem.raw; // Tooltip label format
+                            }
+                        }
+                    }
+                }
+            } 
+        });
+    </script>
+</body>
+</html>

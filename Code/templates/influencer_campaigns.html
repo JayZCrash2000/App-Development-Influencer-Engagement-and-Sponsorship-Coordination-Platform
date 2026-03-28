@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campaigns Requests</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Custom Styles -->
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 56px; /* Adjust for fixed navbar */
+        }
+        .navbar-custom {
+            background-color: #f5f5f5;
+            box-shadow: 0 4px 6px -6px #222;
+        }
+        .navbar-custom .navbar-brand {
+            color: red;
+            font-size: 25px;
+        }
+        .navbar-custom .nav-link {
+            font-size: 18px;
+            color: #333;
+        }
+        .navbar-custom .nav-link:hover {
+            color: #0056b3;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 1000px;
+            margin: auto;
+        }
+        .table thead th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .form-control[readonly] {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .btn-success {
+            background-color: #28a745;
+            border: none;
+        }
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            border: none;
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+        <a class="navbar-brand" href="/">PLATFORM4U</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                {% if 'user' in session %}
+                    <li class="nav-item">
+                        <span class="nav-link">User: {{ user.name }}</span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <div class="container mt-5">
+            <h2 class="mb-4">Private Campaigns from Sponsor</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Campaign Name</th>
+                        <th>Sponsor</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Budget</th>  
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for campaign in campaigns %}
+                        <tr>
+                            <td>{{ campaign.name }}</td>
+                            <td>{{ campaign.sponsor.full_name }}</td>
+                            <td>{{ campaign.start_date }}</td>
+                            <td>{{ campaign.end_date }}</td>
+                            <td>{{ campaign.budget }}</td>
+                            <td>
+                                {% if campaign.campaign_influencers[0].status == 'Pending' %}
+                                    <form method="POST" action="{{ url_for('accept_campaign', campaign_id=campaign.id) }}">
+                                        <button type="submit" class="btn btn-success">Accept</button> <br><br>
+                                    </form>
+                                    <form method="POST" action="{{ url_for('reject_campaign', campaign_id=campaign.id) }}">
+                                        <button type="submit" class="btn btn-danger">Reject</button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
